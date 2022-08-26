@@ -23,7 +23,7 @@ public partial class MainWindow : Window
         SizeChanged += MainWindow_SizeChanged;
 
 
-        windowChrome.ResizeBorderThickness = new Thickness(3, 0, 3, 3);
+        windowChrome.ResizeBorderThickness = new Thickness(3, 3, 3, 3);
         windowChrome.CaptionHeight = 0;
 
         using var source = new HwndSource(new HwndSourceParameters());
