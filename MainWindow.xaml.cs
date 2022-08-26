@@ -18,16 +18,10 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
 
+        SourceInitialized += MainWindow_SourceInitialized;
         Closed += MainWindow_Closed;
         SizeChanged += MainWindow_SizeChanged;
 
-        Height = Properties.Settings.Default.Height;
-        Width = Properties.Settings.Default.Width;
-        if (Properties.Settings.Default.Top != 0 && Properties.Settings.Default.Left != 0)
-        {
-            Top = Properties.Settings.Default.Top;
-            Left = Properties.Settings.Default.Left;
-        }
 
         windowChrome.ResizeBorderThickness = new Thickness(3, 0, 3, 3);
         windowChrome.CaptionHeight = 0;
@@ -37,18 +31,8 @@ public partial class MainWindow : Window
         dpiY = source.CompositionTarget.TransformToDevice.M22;
 
         LoopUpdateCanvas();
-        //LoopClearCanvas();
     }
 
-
-    private async void LoopClearCanvas()
-    {
-        while (true)
-        {
-            await Task.Delay(3000);
-            renderBlank = true;
-        }
-    }
 
     private async void LoopUpdateCanvas()
     {
@@ -68,9 +52,21 @@ public partial class MainWindow : Window
         NormalizeWindow();
     }
 
+    private void MainWindow_SourceInitialized(object? sender, EventArgs e)
+    {
+        TitleText.Text = Properties.Settings.Default.Title;
+        Height = Properties.Settings.Default.Height;
+        Width = Properties.Settings.Default.Width;
+        if (Properties.Settings.Default.Top != 0 && Properties.Settings.Default.Left != 0)
+        {
+            Top = Properties.Settings.Default.Top;
+            Left = Properties.Settings.Default.Left;
+        }
+    }
 
     private void MainWindow_Closed(object? sender, EventArgs e)
     {
+        Properties.Settings.Default.Title = TitleText.Text;
         Properties.Settings.Default.Top = Top;
         Properties.Settings.Default.Left = Left;
         Properties.Settings.Default.Height = Height;
@@ -82,7 +78,6 @@ public partial class MainWindow : Window
     {
         NormalizeWindow();
     }
-
 
     private void Canvas_PaintSurface(object sender, SKPaintSurfaceEventArgs e)
     {

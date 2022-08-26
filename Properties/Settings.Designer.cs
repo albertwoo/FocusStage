@@ -70,5 +70,17 @@ namespace FocusStage.Properties {
                 this["Height"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Focus stage")]
+        public string Title {
+            get {
+                return ((string)(this["Title"]));
+            }
+            set {
+                this["Title"] = value;
+            }
+        }
     }
 }

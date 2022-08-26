@@ -22,13 +22,13 @@
         </Grid.RowDefinitions>
         <Border Name="Border" Grid.Row="1" BorderThickness="2,0,2,2" BorderBrush="White"/>
         <skia:SKElement Name="Canvas" PaintSurface="Canvas_PaintSurface" Grid.RowSpan="2"/>
-        <Grid Background="White" >
+        <Grid Background="White">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="auto"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="auto"/>
             </Grid.ColumnDefinitions>
-            <TextBox Text="Focus staging" BorderThickness="0" Background="Transparent" Margin="10,0,0,0" Padding="0,2,0,0"/>
+            <TextBox Name="TitleText" Text="Focus staging" BorderThickness="0" Background="Transparent" Margin="10,0,0,0" Padding="0,2,0,0"/>
             <Rectangle MouseDown="StartDrag" Grid.Column="1" Fill="Transparent"/>
             <Button Grid.Column="2" Background="Transparent" BorderThickness="0" Padding="5,1,5,1" Click="CloseApp">close</Button>
         </Grid>
