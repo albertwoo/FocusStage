@@ -1,22 +1,25 @@
-﻿using System.Drawing;
-using System.IO;
+﻿using SkiaSharp;
+using SkiaSharp.Views.Desktop;
+using System.Drawing;
 using System.Windows;
 using System.Windows.Interop;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using PixelFormat = System.Drawing.Imaging.PixelFormat;
 
 namespace FocusStage;
 
 public partial class MainWindow : Window
 {
-    private readonly Matrix transformToDevice;
+    private readonly double dpiX;
+    private readonly double dpiY;
+    private bool renderBlank;
+
 
     public MainWindow()
     {
         InitializeComponent();
 
         Closed += MainWindow_Closed;
+        SizeChanged += MainWindow_SizeChanged;
 
         Height = Properties.Settings.Default.Height;
         Width = Properties.Settings.Default.Width;
@@ -30,60 +33,41 @@ public partial class MainWindow : Window
         windowChrome.CaptionHeight = 0;
 
         using var source = new HwndSource(new HwndSourceParameters());
-        transformToDevice = source.CompositionTarget.TransformToDevice;
+        dpiX = source.CompositionTarget.TransformToDevice.M11;
+        dpiY = source.CompositionTarget.TransformToDevice.M22;
 
-        RunUpdateImageTask();
+        LoopUpdateCanvas();
+        //LoopClearCanvas();
     }
 
-    private async Task RunUpdateImageTask()
+
+    private async void LoopClearCanvas()
+    {
+        while (true)
+        {
+            await Task.Delay(3000);
+            renderBlank = true;
+        }
+    }
+
+    private async void LoopUpdateCanvas()
     {
         while (true)
         {
             await Task.Delay(100);
-
-            if (!IsActive)
-            {
-                await UpdateImage();
-            }
-            else
-            {
-                Image.Source = null;
-            }
+            Canvas.InvalidateVisual();
         }
     }
 
-    private async Task UpdateImage()
-    {
-        var widthAndHeight = transformToDevice.Transform(new Vector(Width, Height));
-        var leftAndTop = transformToDevice.Transform(new Vector(Left, Top));
-
-        using var bitmap = new Bitmap((int)widthAndHeight.X, (int)widthAndHeight.Y, PixelFormat.Format32bppArgb);
-        using var graphics = Graphics.FromImage(bitmap);
-
-        Image.Source = null;
-        await Task.Delay(5);
-
-        graphics.CopyFromScreen((int)leftAndTop.X, (int)leftAndTop.Y, 0, 0, bitmap.Size, CopyPixelOperation.SourceCopy);
-
-        Image.Source = BitmapToImageSource(bitmap);
-    }
-
-    private static BitmapImage BitmapToImageSource(Image bitmap)
-    {
-        using var memory = new MemoryStream();
-        bitmap.Save(memory, System.Drawing.Imaging.ImageFormat.Png);
-        memory.Position = 0;
-        var bitmapimage = new BitmapImage();
-        bitmapimage.BeginInit();
-        bitmapimage.StreamSource = memory;
-        bitmapimage.CacheOption = BitmapCacheOption.OnLoad;
-        bitmapimage.EndInit();
-        return bitmapimage;
-    }
 
     private void CloseApp(object sender, RoutedEventArgs e) => Application.Current.Shutdown();
 
-    private void StartDrag(object sender, System.Windows.Input.MouseButtonEventArgs e) => DragMove();
+    private void StartDrag(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+        DragMove();
+        NormalizeWindow();
+    }
+
 
     private void MainWindow_Closed(object? sender, EventArgs e)
     {
@@ -92,5 +76,45 @@ public partial class MainWindow : Window
         Properties.Settings.Default.Height = Height;
         Properties.Settings.Default.Width = Width;
         Properties.Settings.Default.Save();
+    }
+
+    private void MainWindow_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        NormalizeWindow();
+    }
+
+
+    private void Canvas_PaintSurface(object sender, SKPaintSurfaceEventArgs e)
+    {
+        var canvas = e.Surface.Canvas;
+
+        if (!IsActive && !renderBlank)
+        {
+            using var bitmap = new Bitmap((int)(Width * dpiX), (int)(Height * dpiY), PixelFormat.Format32bppArgb);
+            using var graphics = Graphics.FromImage(bitmap);
+
+            graphics.CopyFromScreen((int)(Left * dpiX), (int)(Top * dpiY), 0, 0, bitmap.Size, CopyPixelOperation.SourceCopy);
+
+            using var skBitmap = bitmap.ToSKBitmap();
+
+            canvas.Clear(SKColors.Transparent);
+            canvas.DrawBitmap(skBitmap, new SKPoint(0, 0));
+        }
+        else
+        {
+            canvas.Clear(SKColors.Transparent);
+        }
+
+        renderBlank = false;
+    }
+
+
+    private void NormalizeWindow()
+    {
+        Left = (int)(Left * dpiX) / dpiX;
+        Top = (int)(Top * dpiY) / dpiY;
+
+        Width = (int)(Width * dpiX) / dpiX;
+        Height = (int)(Height * dpiY) / dpiY;
     }
 }

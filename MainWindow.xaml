@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:skia="clr-namespace:SkiaSharp.Views.WPF;assembly=SkiaSharp.Views.WPF"
         mc:Ignorable="d"
         Title="Focus stage" 
         Top="10" Left="10"
@@ -19,9 +20,9 @@
             <RowDefinition Height="22"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <Border Name="Border" Grid.Row="1" BorderThickness="2,0,2,2" BorderBrush="#B2FFFFFF"/>
-        <Image Name="Image" Stretch="UniformToFill"  Grid.Row="0" Grid.RowSpan="2"/>
-        <Grid Background="#B2FFFFFF" >
+        <Border Name="Border" Grid.Row="1" BorderThickness="2,0,2,2" BorderBrush="White"/>
+        <skia:SKElement Name="Canvas" PaintSurface="Canvas_PaintSurface" Grid.RowSpan="2"/>
+        <Grid Background="White" >
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="auto"/>
                 <ColumnDefinition Width="*"/>
@@ -29,7 +30,7 @@
             </Grid.ColumnDefinitions>
             <TextBox Text="Focus staging" BorderThickness="0" Background="Transparent" Margin="10,0,0,0" Padding="0,2,0,0"/>
             <Rectangle MouseDown="StartDrag" Grid.Column="1" Fill="Transparent"/>
-            <Button Grid.Column="2" Background="Transparent" BorderThickness="0" Padding="5,1,5,1" Click="CloseApp">EXIST</Button>
+            <Button Grid.Column="2" Background="Transparent" BorderThickness="0" Padding="5,1,5,1" Click="CloseApp">close</Button>
         </Grid>
     </Grid>
 </Window>
